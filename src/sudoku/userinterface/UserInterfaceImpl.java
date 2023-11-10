@@ -59,9 +59,28 @@ public class UserInterfaceImpl implements IUserInterfaceContract.view {
         }
 
         private void drawGridLines(Group root) {
+            int xAndY = 114;
+            int index = 0;
+            while (index < 8) {
+                int thickness;
+                if (index == 2 || 5) {
+                    thickness = 3;
+                } else {
+                    thickness = 2;
+                }
 
+                Rectangle verticalLine = getLine(
+                        xAndY + 64 * index,
+                        BOARD_PADDING,
+                        BOARD_X_AND_Y,
+                        thickness
+                );
+            }
         }
 
+        private Rectangle getLine(double x, double y, double height, double width) {
+            return null;
+        }
         private void drawTextFields(Group root) {
 
         }
