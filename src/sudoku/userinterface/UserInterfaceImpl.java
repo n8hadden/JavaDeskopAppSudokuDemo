@@ -17,6 +17,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import sudoku.problemdomain.SudokuGame;
+import sudoku.userinterface.IUserInterfaceContract;
 
 import java.util.HashMap;
 
@@ -108,7 +109,7 @@ public class UserInterfaceImpl implements IUserInterfaceContract.view, EventHand
 
             final int xAndYDelta = 64;
 
-            // O (n^3) Runtime Complexity
+            // O (n^2) Runtime Complexity
             for (int xIndex = 0; xIndex < 9; xIndex++) {
                 for (int yIndex = 0;yIndex < 9; yIndex++) {
                     int x = xOrigin + xIndex * xAndYDelta;
@@ -117,6 +118,12 @@ public class UserInterfaceImpl implements IUserInterfaceContract.view, EventHand
                     SudokuTextField tile = new SudokuTextField(xIndex, yIndex);
 
                     styleSudokuTile(tile, x, y);
+
+                    tile.setOnKeyPressed(this);
+
+                    textFieldCoordinates.put(new Coordinates(xIndex, yIndex), tile);
+
+                    root.getChildren().add(tile);
                 }
             }
         }
@@ -137,15 +144,30 @@ public class UserInterfaceImpl implements IUserInterfaceContract.view, EventHand
 
 
         private void drawSudokuBoard(Group root) {
+            Rectangle boardBackground = new Rectangle();
+            boardBackground.setX(BOARD_PADDING);
+            boardBackground.setY(BOARD_PADDING);
 
+            boardBackground.setWidth(BOARD_X_AND_Y);
+            boardBackground.setHeight(BOARD_X_AND_Y);
+
+            boardBackground.setFill(BOARD_BACKGROUND_COLOR);
+
+            root.getChildren().addAll(boardBackground);
         }
 
         private void drawTitle(Group root) {
-
+            Text title = new Text(235, 690, SUDOKU);
+            title.setFill(Color.WHITE);
+            Font titleFont = new Font(43);
+            title.setFont(titleFont);
+            root.getChildren().add(title);
         }
 
         private void drawBackground(Group root) {
-
+            Scene scene = new Scene(root, WINDOW_X, WINDOW_Y);
+            scene.setFill(WINDOW_BACKGROUND_COLOR);
+            stage.setScene(scene);
         }
 
         @Override
@@ -155,7 +177,67 @@ public class UserInterfaceImpl implements IUserInterfaceContract.view, EventHand
 
         @Override
         public void updateSquare(int x, int y, int input) {
+            SudokuTextField title = textFieldCoordinates.get(new Coordinates(x, y));
 
+            String value = Integer.toString(
+                    input
+            );
+
+            if (value.equals("0")) value = "";
+
+            tile.textProperty().setValue(value);
+        }
+
+        @Override
+        public void updateBoard(SudokuGame game) {
+            for (int xindex = 0; xIndex < 9; xIndex++) {
+                for (int inydex = 0; yIndex < 9; yIndex++) {
+                    TextField title = textFieldCoordinates.get(new Coordinates(xIndex, yIndex));
+
+                    String value = Integer.toString(
+                            game.getCopyOfGridState()[xIndex][yIndex]
+                    );
+
+                    if (value.equals("0")) value = "";
+
+                    tile.setText(
+                            value
+                    );
+
+                    if (game.getGameState() == GameState.NEW) {
+                        if (value.equals("")) {
+                            tile.setStyle("-fx-opacity: 1;");
+                            tile.setDisable(false);
+                        } else {
+                            tile.setStyle("-fx-opacity: 0.8;");
+                            tile.setDisable(true);
+                        }
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void showDialog(String message) {
+            Alert dialog = new Alert(Alert.Type.CONFIRMATION, message, ButtonType.OK);
+            dialog.showAndWait();
+
+            if (dialog.getResult() == ButtonType.OK) listener.onDialogClick();
+        }
+
+        @Override
+        public void showError(String message) {
+            Alert dialog = new Alert(Alert.AlertType.ERROR, message, ButtonType.OK);
+            dialog.showAndWait();
+        }
+
+        @Override
+        public void handle(KeyEvent event) {
+            if (event.getEventType() == KeyEvent.KEY_PRESSED) {
+                if (event.getText().matches("[0-9]")) {
+                    int value = Integer.parseInt(event.getText());
+                }
+            }
         }
     }
 }
